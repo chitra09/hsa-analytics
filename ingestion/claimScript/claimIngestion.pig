@@ -29,9 +29,10 @@ join_claims = join claims_s by claimId, claims_detail_s by claimId;
 join_claims_members = join join_claims by memberId, member_age by memberId;
 
 
+claims_detail = foreach join_claims_members generate claims_s::claimId as claimId, claims_detail_s::cptCode,  claims_s::memberId as memberId, member_age::age as age, claims_s::dateProcessed as dateProcessed, claims_s::patientResponsabilityAmount as patientResponsabilityAmount, claims_s::repricedAmount as repricedAmount; 
 
 
-dump join_claims_members;
+dump claims_detail;
 
 /*
 ***********************************************************
@@ -45,3 +46,4 @@ describe member_age;
 describe claims_detail_s;
 describe join_claims;
 describe join_claims_members;
+describe claims_detail;
