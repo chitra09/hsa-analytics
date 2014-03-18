@@ -4,3 +4,5 @@ ingestion/ingestionClaims/ingest-data.sh
 ingestion/ingestionClaims/ingestion.properties
 
 *.log
+
+ingestion/claimScript/claimsMembers.pig
