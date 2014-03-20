@@ -2,3 +2,11 @@
 *.log
 
 *.cvs
+
+data-transform/data-transform.properties
+
+data-transform/run-data-transform.sh
+
+data-transform/run-data-transform.sh
+
+ingestion/ingestion.properties
