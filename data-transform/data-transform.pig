@@ -28,10 +28,10 @@ members_age 	= foreach members generate memberId,  (GetYear(CurrentTime()) - bir
 
 dependents_age 	= foreach dependents generate  dependentId, memberId, relationship, (GetYear(CurrentTime()) - birthYear) as ageDependent, gender;
 
-claims_dates =  foreach claims generate claimId, memberId, dependentService, claimType,  REGEX_EXTRACT(serviceStart, '(.*)-(.*)', 1) as serviceStartDate, repricedAmount, patientResponsabilityAmount;
+claims_dates =  foreach claims generate claimId, memberId, dependentService, claimType, (chararray) REGEX_EXTRACT(serviceStart, '(.*)-(.*)', 1) as serviceStartDate, repricedAmount, (double)patientResponsabilityAmount;
 
 
-trasactions_dates = foreach transactions generate memberId, amount, REGEX_EXTRACT(paymentAvailableDate, '(.*)-(.*)', 1) as paymentDate;
+trasactions_dates = foreach transactions generate memberId, amount, (chararray)REGEX_EXTRACT(paymentAvailableDate, '(.*)-(.*)', 1) as paymentDate;
 
 
 /*
@@ -76,22 +76,37 @@ member_balances = group trasactions_dates by (memberId, paymentDate);
 --monthy_member_visits = foreach claims_members generate flatten(group), COUNT(claims_dates_members_dependents) as visits ; 
 monthly_member_visits = foreach member_claims generate flatten(group), COUNT(claims_dates) as visits;
 monthly_visits_by_age = foreach age_claims generate flatten(group), COUNT(claims_dates_members_dependents) as visits;
-monthly_member_balance = foreach member_balances generate flatten(group) , SUM(trasactions_dates.amount);
+monthly_member_balance = foreach member_balances generate flatten(group) ,(double) SUM(trasactions_dates.amount) as amount;
 
-monthly_member_payments_claims = foreach member_payments_claims generate flatten(group) , (double) SUM(claims_dates.patientResponsabilityAmount) ;
+monthly_member_payments_claims = foreach member_payments_claims generate flatten(group) , (double) SUM(claims_dates.patientResponsabilityAmount) as patientResponsabilityAmount ;
 
-describe monthly_member_payments_claims;
-
-describe monthly_member_balance;
 
 /*
-
 ***********************************************************
  Data cleaning
 ***********************************************************
 */
 
 --claims_detail = foreach join_claims_members_age generate claims_s::claimId as claimId, claims_detail_s::cptCode as cptCode,  claims_s::memberId as memberId, members_age::ageMember as memberAge, claims_s::dateProcessed as dateProcessed, claims_s::patientResponsabilityAmount as patientResponsabilityAmount, claims_s::repricedAmount as repricedAmount; 
+
+
+
+/*
+***********************************************************
+Joins
+***********************************************************
+*/
+
+montly_member_balance_monthly_member_payments_claims = join monthly_member_balance by (group::memberId, group::paymentDate), monthly_member_payments_claims by (group::memberId, group::serviceStartDate);
+
+/*
+***********************************************************
+ Data transformation
+***********************************************************
+*/
+
+montly_member_balance_spends = foreach montly_member_balance_monthly_member_payments_claims generate monthly_member_balance::group::memberId as memberId, monthly_member_balance::group::paymentDate as monthOfService, monthly_member_balance::amount as accountBalance, monthly_member_payments_claims::patientResponsabilityAmount as amountSpent;
+
 
 /*
 ***********************************************************
@@ -111,6 +126,11 @@ describe monthly_member_visits;
 describe monthly_visits_by_age;
 describe monthly_member_balance;
 describe monthly_member_payments_claims;
+describe montly_member_balance_monthly_member_payments_claims;
+describe montly_member_balance_spends;
+
+
+
 
 /*
 ***********************************************************
