@@ -2,3 +2,7 @@
 *.log
 *.csv
 
+
+data-transform/data-transform-miguel.pig
+
+data-transform/run-data-transform-miguel.sh
