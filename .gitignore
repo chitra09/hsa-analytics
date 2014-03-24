@@ -1,7 +1,13 @@
 
 *.log
 *.csv
+
 data-loader/target
 data-loader/dependency-reduced-pom.xml
+data-loader/.classpath
+data-loader/.project
+data-loader/.settings/*
+
+
 data-transform/data-transform-miguel.pig
 data-transform/run-data-transform-miguel.sh
