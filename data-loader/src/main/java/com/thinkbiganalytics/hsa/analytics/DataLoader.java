@@ -12,6 +12,10 @@ import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.apache.hadoop.hbase.ZooKeeperConnectionException;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
+import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
+import org.apache.hadoop.hbase.mapreduce.HFileOutputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -42,9 +46,15 @@ public class DataLoader {
 		}
 		Job job = new Job(conf, "Data Loader");
 		job.setJarByClass(DataLoader.class);
-		job.setMapperClass(DataLoaderMapper.class);
+		job.setMapperClass(MemberLoaderMapper.class);
 		FileInputFormat.addInputPath(job, new Path(otherArgs[1]));
 		FileOutputFormat.setOutputPath(job, new Path(otherArgs[2]));
+		
+		job.setMapOutputKeyClass(ImmutableBytesWritable.class);
+		job.setMapOutputValueClass(Put.class);
+
+		HTable hTable = new HTable(conf, LoaderConstants.MEMBER_TABLE);
+		HFileOutputFormat.configureIncrementalLoad(job, hTable);
 		job.waitForCompletion(true);
 	}
 

@@ -7,6 +7,9 @@ package com.thinkbiganalytics.hsa.analytics;
  * The dependent data is of the form
  * NewMemberID,DependentID,Relationship,BirthYear,Gender,State,Zip
  * 
+ * The transaction data is of the form
+ * NewMemberID,Amount,Category,PaymentAvailableDate
+ * 
  */
 public class Member {
 
@@ -18,6 +21,7 @@ public class Member {
 	private String hsaEffectiveDate;
 	private boolean isMember;
 	private boolean isValid;
+	private DataType type;
 
 	// Dependent Specific Info
 	private String dID;
@@ -27,17 +31,24 @@ public class Member {
 	private String dState;
 	private String dZip;
 
+	// Transaction Specific Info
+	private double amount;
+	private String category;
+	private String paymentAvailableDate;
+
 	public Member(String row) {
-		String fields[] = row.split(",");
+		String fields[] = row.split(",", -1);
 		// Check for header information in the data set
 		if (fields[0].equalsIgnoreCase(LoaderConstants.MEMBER_SCHEMA[0])
 				|| fields[0]
-						.equalsIgnoreCase(LoaderConstants.DEPENDENT_SCHEMA[0])) {
+						.equalsIgnoreCase(LoaderConstants.DEPENDENT_SCHEMA[0])
+				|| fields[0]
+						.equalsIgnoreCase(LoaderConstants.TRANSACTION_SCHEMA[0])) {
 			isValid = false;
 		} else {
 			isValid = true;
 			if (fields.length == LoaderConstants.MEMBER_SCHEMA.length) {
-				isMember = true;
+				setType(DataType.MEMBER);
 				setMemberID(fields[0]);
 				setState(fields[1]);
 				setZip(fields[2]);
@@ -45,7 +56,7 @@ public class Member {
 				setBirthYear(fields[4]);
 				setHsaEffectiveDate(fields[5]);
 			} else if (fields.length == LoaderConstants.DEPENDENT_SCHEMA.length) {
-				isMember = false;
+				setType(DataType.DEPENDENT);
 				setMemberID(fields[0]);
 				setdID(fields[1]);
 				setRelationship(fields[2]);
@@ -53,12 +64,14 @@ public class Member {
 				setdGender(fields[4]);
 				setdState(fields[5]);
 				setdZip(fields[6]);
+			} else if (fields.length == LoaderConstants.TRANSACTION_SCHEMA.length) {
+				setType(DataType.TRANSATION);
+				setMemberID(fields[0]);
+				setAmount(fields[1]);
+				setCategory(fields[2]);
+				setPaymentAvailableDate(fields[3]);
 			}
 		}
-	}
-
-	public boolean isMember() {
-		return isMember;
 	}
 
 	public String getBirthYear() {
@@ -138,7 +151,7 @@ public class Member {
 		return (isMember == true) ? LoaderConstants.MEMBER_SCHEMA.length
 				: LoaderConstants.DEPENDENT_SCHEMA.length;
 	}
-	
+
 	public String getdBirthYear() {
 		return dBirthYear;
 	}
@@ -169,5 +182,37 @@ public class Member {
 
 	public void setdZip(String dZip) {
 		this.dZip = dZip;
+	}
+
+	public double getAmount() {
+		return amount;
+	}
+
+	public void setAmount(String amount) {
+		this.amount = Double.parseDouble(amount);
+	}
+
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
+	}
+
+	public String getPaymentAvailableDate() {
+		return paymentAvailableDate;
+	}
+
+	public void setPaymentAvailableDate(String paymentAvailableDate) {
+		this.paymentAvailableDate = paymentAvailableDate;
+	}
+	
+	public DataType getType() {
+		return type;
+	}
+
+	public void setType(DataType type) {
+		this.type = type;
 	}
 }
