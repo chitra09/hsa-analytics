@@ -1,7 +1,8 @@
 
 *.log
 *.csv
-
+.metadata/*
+*.class
 data-loader/target
 data-loader/dependency-reduced-pom.xml
 data-loader/.classpath
