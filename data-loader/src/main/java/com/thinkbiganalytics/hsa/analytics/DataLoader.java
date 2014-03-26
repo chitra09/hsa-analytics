@@ -42,9 +42,10 @@ public class DataLoader {
 		setConfiguration(otherArgs[0]);
 
 		if (!hbaseTableExists(LoaderConstants.MEMBER_TABLE)) {
-			createTable(LoaderConstants.MEMBER_TABLE, LoaderConstants.FAMILIES);
+			createTable(LoaderConstants.MEMBER_TABLE, LoaderConstants.MEMBER_FAMILIES);
 		}
-		Job job = new Job(conf, "Data Loader");
+		//Load MEMBER table
+		Job job = new Job(conf, "Member Data Loader");
 		job.setJarByClass(DataLoader.class);
 		job.setMapperClass(MemberLoaderMapper.class);
 		FileInputFormat.addInputPath(job, new Path(otherArgs[1]));
@@ -56,6 +57,20 @@ public class DataLoader {
 		HTable hTable = new HTable(conf, LoaderConstants.MEMBER_TABLE);
 		HFileOutputFormat.configureIncrementalLoad(job, hTable);
 		job.waitForCompletion(true);
+		
+		//Load Claims table
+		Job job2 = new Job(conf, "Claims Data Loader");
+		job2.setJarByClass(DataLoader.class);
+		job2.setMapperClass(ClaimsLoaderMapper.class);
+		FileInputFormat.addInputPath(job, new Path(otherArgs[3]));
+		FileOutputFormat.setOutputPath(job, new Path(otherArgs[4]));
+		
+		job2.setMapOutputKeyClass(ImmutableBytesWritable.class);
+		job2.setMapOutputValueClass(Put.class);
+
+		hTable = new HTable(conf, LoaderConstants.CLAIMS_TABLE);
+		HFileOutputFormat.configureIncrementalLoad(job2, hTable);
+		job2.waitForCompletion(true);
 	}
 
 	private static void setConfiguration(String propertiesPath) {
