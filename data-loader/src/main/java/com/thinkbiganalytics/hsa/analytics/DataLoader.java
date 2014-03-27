@@ -27,7 +27,7 @@ public class DataLoader {
 
 	private static void usage() {
 		System.out
-				.println("usage: <loader.properties> <input> <output>");
+				.println("usage: <loader.properties> <input> <output> <input> <>");
 		System.exit(1);
 	}
 
@@ -37,10 +37,11 @@ public class DataLoader {
 		String[] otherArgs = new GenericOptionsParser(conf, args)
 				.getRemainingArgs();
 
-		if (otherArgs.length != 3)
+		if (otherArgs.length != 5)
 			usage();
 		setConfiguration(otherArgs[0]);
-
+		HTable hTable = null;
+		
 		if (!hbaseTableExists(LoaderConstants.MEMBER_TABLE)) {
 			createTable(LoaderConstants.MEMBER_TABLE, LoaderConstants.MEMBER_FAMILIES);
 		}
@@ -54,16 +55,23 @@ public class DataLoader {
 		job.setMapOutputKeyClass(ImmutableBytesWritable.class);
 		job.setMapOutputValueClass(Put.class);
 
-		HTable hTable = new HTable(conf, LoaderConstants.MEMBER_TABLE);
+		hTable = new HTable(conf, LoaderConstants.MEMBER_TABLE);
 		HFileOutputFormat.configureIncrementalLoad(job, hTable);
 		job.waitForCompletion(true);
+		
+		
+	
+		if (!hbaseTableExists(LoaderConstants.CLAIMS_TABLE)) {
+			createTable(LoaderConstants.CLAIMS_TABLE, LoaderConstants.CLAIMS_FAMILIES);
+		}
 		
 		//Load Claims table
 		Job job2 = new Job(conf, "Claims Data Loader");
 		job2.setJarByClass(DataLoader.class);
 		job2.setMapperClass(ClaimsLoaderMapper.class);
-		FileInputFormat.addInputPath(job, new Path(otherArgs[3]));
-		FileOutputFormat.setOutputPath(job, new Path(otherArgs[4]));
+		FileInputFormat.addInputPath(job2, new Path(otherArgs[3]));
+		FileOutputFormat.setOutputPath(job2, new Path(otherArgs[4]));
+		
 		
 		job2.setMapOutputKeyClass(ImmutableBytesWritable.class);
 		job2.setMapOutputValueClass(Put.class);
