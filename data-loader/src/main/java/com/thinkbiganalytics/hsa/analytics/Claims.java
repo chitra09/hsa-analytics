@@ -24,8 +24,8 @@ public class Claims {
 	private String dateProcessed;
 	private String serviceStart;
 	private String serviceEnd;
-	private double repricedAmt;
-	private double finalAmt;
+	private String repricedAmt;
+	private String finalAmt;
 	private boolean isValid;
 	private DataType type;
 
@@ -126,20 +126,20 @@ public class Claims {
 		this.serviceEnd = serviceEnd;
 	}
 
-	public double getRepricedAmt() {
+	public String getRepricedAmt() {
 		return repricedAmt;
 	}
 
 	public void setRepricedAmt(String repricedAmt) {
-		this.repricedAmt = Double.parseDouble(repricedAmt);
+		this.repricedAmt = repricedAmt;
 	}
 
-	public double getFinalAmt() {
+	public String getFinalAmt() {
 		return finalAmt;
 	}
 
 	public void setFinalAmt(String finalAmt) {
-		this.finalAmt = Double.parseDouble(finalAmt);
+		this.finalAmt = finalAmt;
 	}
 
 	public String getCptCode() {

@@ -32,7 +32,7 @@ public class Member {
 	private String dZip;
 
 	// Transaction Specific Info
-	private double amount;
+	private String amount;
 	private String category;
 	private String paymentAvailableDate;
 
@@ -184,12 +184,12 @@ public class Member {
 		this.dZip = dZip;
 	}
 
-	public double getAmount() {
+	public String getAmount() {
 		return amount;
 	}
 
 	public void setAmount(String amount) {
-		this.amount = Double.parseDouble(amount);
+		this.amount = amount;
 	}
 
 	public String getCategory() {

@@ -51,11 +51,10 @@ public class DataParseTest {
 	@Test
 	public void parseTransactionData() {
 		String data = "7252,-30.200,DistNormal,2012-11-14 00:00:00.000";
-		double epsilon = 0.000000000001;
 		Member member = new Member(data);
 		assertEquals(DataType.TRANSATION, member.getType());
 		assertEquals("7252", member.getMemberID());
-		assertEquals(-30.200, member.getAmount(), epsilon);
+		assertEquals("-30.200", member.getAmount());
 		assertEquals("DistNormal", member.getCategory());
 		assertEquals("2012-11-14 00:00:00.000",
 				member.getPaymentAvailableDate());
@@ -64,7 +63,6 @@ public class DataParseTest {
 	@Test
 	public void parseClaimsData() {
 		String data = "6,254,02,Professional,2013-12-20 16:37:42.000,2013-12-20 16:38:50.753,2013-01-19 00:00:00.000,2013-01-20 00:00:00.000,108.68,95.88";
-		double epsilon = 0.000000000001;
 		Claims claims = new Claims(data);
 		assertEquals(DataType.CLAIMS, claims.getType());
 		assertEquals("6", claims.getClaimID());
@@ -75,8 +73,8 @@ public class DataParseTest {
 		assertEquals("2013-12-20 16:38:50.753", claims.getDateProcessed());
 		assertEquals("2013-01-19 00:00:00.000", claims.getServiceStart());
 		assertEquals("2013-01-20 00:00:00.000", claims.getServiceEnd());
-		assertEquals(108.68, claims.getRepricedAmt(), epsilon);
-		assertEquals(95.88, claims.getFinalAmt(), epsilon);
+		assertEquals("108.68", claims.getRepricedAmt());
+		assertEquals("95.88", claims.getFinalAmt());
 	}
 
 	@Test
