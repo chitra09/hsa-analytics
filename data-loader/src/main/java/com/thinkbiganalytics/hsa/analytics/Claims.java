@@ -5,11 +5,8 @@ package com.thinkbiganalytics.hsa.analytics;
  * 
  * NewClaimID,NewMemberID,DependentServiced,ClaimType,DateReceived,
  * DateProcessed
- * ,ServiceStart,ServiceEnd,RepricedAmount,PatientResponsibilityAmount
+ * ,ServiceStart,ServiceEnd,RepricedAmount,PatientResponsibilityAmount,cpt
  * 
- * Claims Details
- * 
- * NewClaimID,CPTCode
  * 
  */
 
@@ -28,16 +25,12 @@ public class Claims {
 	private String finalAmt;
 	private boolean isValid;
 	private DataType type;
-
-	// Claims Details
 	private String cptCode;
 
 	public Claims(String row) {
 		String fields[] = row.split(",", -1);
 		// Check for header information in the data set
-		if (fields[0].equalsIgnoreCase(LoaderConstants.CLAIMS_SCHEMA[0])
-				|| fields[0]
-						.equalsIgnoreCase(LoaderConstants.CLAIMS_DETAILS_SCHEMA[0])) {
+		if (fields[0].equalsIgnoreCase(LoaderConstants.CLAIMS_SCHEMA[0])) {
 			isValid = false;
 		} else {
 			isValid = true;
@@ -53,12 +46,8 @@ public class Claims {
 				setServiceEnd(fields[7]);
 				setRepricedAmt(fields[8]);
 				setFinalAmt(fields[9]);
-			} else if (fields.length == LoaderConstants.CLAIMS_DETAILS_SCHEMA.length) {
-				setType(DataType.CLAIMS_DETAILS);
-				setClaimID(fields[0]);
-				setCptCode(fields[1]);
+				setCptCode(fields[10]);
 			}
-
 		}
 	}
 

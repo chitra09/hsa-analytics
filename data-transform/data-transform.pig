@@ -1,4 +1,19 @@
-import 'data-load-$source_type.pig';
+
+/*
+***********************************************************
+ Read the data from HDFS
+***********************************************************
+*/
+
+claims = load '$inputClaim' using PigStorage(',') as (claimId:int, memberId:int, dependentService:int, claimType:chararray, dateReceived:chararray, dateProcessed:chararray, serviceStart:chararray, serviceEnd:chararray,repricedAmount:chararray, patientResponsabilityAmount:double );
+
+claims_details = load '$inputClaimDetails' using PigStorage(',') as (claimId:int, cptCode:chararray); 
+
+members = load '$inputMember' using PigStorage(',') as (memberId:int, state:chararray, cp:int, gender:chararray, birthYear:int, hsaEffectiveDate:chararray);
+
+dependents = load '$inputDependent' using PigStorage(',') as (memberId:int, dependentId:int, relationship:chararray, birthYear:int, gender:chararray, state:chararray, zip:chararray); 
+
+transactions = load '$inputTransactions' using PigStorage(',') as (memberId:int, amount:double, category:chararray, paymentAvailableDate:chararray);
 
 /*
 ***********************************************************
@@ -55,37 +70,14 @@ member_balances = group trasactions_dates by (memberId, paymentDate);
 ***********************************************************
 */
                                                              
---monthy_member_visits = foreach claims_members generate flatten(group), COUNT(claims_dates_members_dependents) as visits ; 
 monthly_member_visits = foreach member_claims generate flatten(group), COUNT(claims_dates) as visits;
 monthly_visits_by_age = foreach age_claims generate flatten(group), COUNT(claims_dates_members_dependents) as visits;
 monthly_member_balance = foreach member_balances generate flatten(group) ,(double) SUM(trasactions_dates.amount) as amount;
 
 monthly_member_payments_claims = foreach member_payments_claims generate flatten(group) , (double) SUM(claims_dates.patientResponsabilityAmount) as patientResponsabilityAmount ;
 
-
-/*
-***********************************************************
- Data cleaning
-***********************************************************
-*/
-
---claims_detail = foreach join_claims_members_age generate claims_s::claimId as claimId, claims_detail_s::cptCode as cptCode,  claims_s::memberId as memberId, members_age::ageMember as memberAge, claims_s::dateProcessed as dateProcessed, claims_s::patientResponsabilityAmount as patientResponsabilityAmount, claims_s::repricedAmount as repricedAmount; 
-
-
-
-/*
-***********************************************************
-Joins
-***********************************************************
-*/
-
 montly_member_balance_monthly_member_payments_claims = join monthly_member_balance by (group::memberId, group::paymentDate), monthly_member_payments_claims by (group::memberId, group::serviceStartDate);
 
-/*
-***********************************************************
- Data transformation
-***********************************************************
-*/
 
 montly_member_balance_spends = foreach montly_member_balance_monthly_member_payments_claims generate monthly_member_balance::group::memberId as memberId, monthly_member_balance::group::paymentDate as monthOfService, monthly_member_balance::amount as accountBalance, monthly_member_payments_claims::patientResponsabilityAmount as amountSpent;
 
@@ -101,8 +93,6 @@ describe claims;
 describe members;
 describe members_age;
 describe claims_details;
---describe join_claims_claims_details;
---describe join_claims_members_age;
 describe member_claims;
 describe monthly_member_visits;
 describe monthly_visits_by_age;
@@ -113,19 +103,20 @@ describe montly_member_balance_spends;
 
 
 
-
 /*
 ***********************************************************
  Store the output
 ***********************************************************
 */
 
-dump montly_member_balance_spends;
---dump monthy_member_visits;
 --Output format: MemberID, DependentID, Month_Of_Service, Count
---store monthly_member_visits into '$monthly_member_visits' using PigStorage(',');
+store monthly_member_visits into '$monthly_member_visits' using PigStorage(',');
 
 --Output format: Age, Month_Of_Service, Count
---store monthly_visits_by_age into '$monthly_visits_by_age' using PigStorage(',');
+store monthly_visits_by_age into '$monthly_visits_by_age' using PigStorage(',');
+
+
+--Output format: MemberID, Month_Of_Service, Account_Balance, Amount_Spent
+store montly_member_balance_spends into '$monthly_member_balance_spends' using PigStorage(',');
 
 

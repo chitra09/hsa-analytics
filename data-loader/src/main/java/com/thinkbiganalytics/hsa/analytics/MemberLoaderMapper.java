@@ -26,9 +26,8 @@ public class MemberLoaderMapper extends
 
 				// TODO: use salted rowkeys
 				String rowkey = member.getMemberID();
-				long keyCheck = Long.parseLong(rowkey);
 
-				if (keyCheck >= 0) {
+				if (!rowkey.isEmpty()) {
 					if (member.getType() == DataType.MEMBER) {
 						// Member
 						// NewMemberID,State,Zip,Gender,BirthYear,HsaEffectiveDate
@@ -78,24 +77,7 @@ public class MemberLoaderMapper extends
 								Bytes.toBytes(member.getdZip()));
 						hKey.set(Bytes.toBytes(rowkey));
 						context.write(hKey, put);
-					} else if (member.getType() == DataType.TRANSATION) {
-
-						// Transaction
-						// NewMemberID,Amount,Category,PaymentAvailableDate
-
-						Put put = new Put(Bytes.toBytes(rowkey));
-						put.add(Bytes.toBytes(LoaderConstants.MEMBER_FAMILY),
-								Bytes.toBytes("amt"),
-								Bytes.toBytes(member.getAmount()));
-						put.add(Bytes.toBytes(LoaderConstants.MEMBER_FAMILY),
-								Bytes.toBytes("category"),
-								Bytes.toBytes(member.getCategory()));
-						put.add(Bytes.toBytes(LoaderConstants.MEMBER_FAMILY),
-								Bytes.toBytes("pymtDt"),
-								Bytes.toBytes(member.getPaymentAvailableDate()));
-						hKey.set(Bytes.toBytes(rowkey));
-						context.write(hKey, put);
-					}
+					} 
 				}
 			}
 		} catch (NumberFormatException e) {

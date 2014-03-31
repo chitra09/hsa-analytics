@@ -14,8 +14,7 @@ public class LoaderConstants {
 	public static final String[] DEPENDENT_SCHEMA = { "NewMemberID",
 			"DependentID", "Relationship", "BirthYear", "Gender", "State",
 			"Zip" };
-	public static final String[] TRANSACTION_SCHEMA = { "NewMemberID",
-			"Amount", "Category", "PaymentAvailableDate" };
+
 
 	// Claims Table
 	public static final String CLAIMS_TABLE = "CLAIMS";
@@ -25,8 +24,14 @@ public class LoaderConstants {
 	public static final String[] CLAIMS_SCHEMA = { "NewClaimID", "NewMemberID",
 			"DependentServiced", "ClaimType", "DateReceived", "DateProcessed",
 			"ServiceStart", "ServiceEnd", "RepricedAmount",
-			"PatientResponsibilityAmount" };
-	public static final String[] CLAIMS_DETAILS_SCHEMA = { "NewClaimID",
-			"CPTCode" };
+			"PatientResponsibilityAmount", "cpt" };
+	
+	// Transaction Table
+	public static final String TRANSACTION_TABLE = "TRANSACTIONS";
+	public static final String TRANSACTION_FAMILY = "D";
+	public static final String[] TRANSACTION_FAMILIES = { TRANSACTION_FAMILY };
+	public static final String[] TRANSACTION_SCHEMA = { "NewMemberID",
+		"Amount", "Category", "PaymentAvailableDate" };
+
 
 }

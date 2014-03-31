@@ -25,7 +25,7 @@ public class ClaimsLoaderMapper extends
 				// The row is either claims or claims details data
 
 				// TODO: use salted rowkeys
-				String rowkey = claims.getClaimID();
+				String rowkey = claims.getMemberID() + "_" + claims.getClaimID() + "_"  + claims.getDateProcessed();
 
 				if (claims.getType() == DataType.CLAIMS) {
 					// Claims
@@ -34,9 +34,7 @@ public class ClaimsLoaderMapper extends
 					// ,ServiceStart,ServiceEnd,RepricedAmount,PatientResponsibilityAmount
 
 					Put put = new Put(Bytes.toBytes(rowkey));
-					put.add(Bytes.toBytes(LoaderConstants.CLAIMS_FAMILY),
-							Bytes.toBytes("mID"),
-							Bytes.toBytes(claims.getMemberID()));
+	
 					put.add(Bytes.toBytes(LoaderConstants.CLAIMS_FAMILY),
 							Bytes.toBytes("dependent"),
 							Bytes.toBytes(claims.getDependentServiced()));
@@ -46,9 +44,6 @@ public class ClaimsLoaderMapper extends
 					put.add(Bytes.toBytes(LoaderConstants.CLAIMS_FAMILY),
 							Bytes.toBytes("dtRcvd"),
 							Bytes.toBytes(claims.getDateRcvd()));
-					put.add(Bytes.toBytes(LoaderConstants.CLAIMS_FAMILY),
-							Bytes.toBytes("dtProcessed"),
-							Bytes.toBytes(claims.getDateProcessed()));
 					put.add(Bytes.toBytes(LoaderConstants.CLAIMS_FAMILY),
 							Bytes.toBytes("start"),
 							Bytes.toBytes(claims.getServiceStart()));

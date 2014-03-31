@@ -65,7 +65,7 @@ public class Member {
 				setdState(fields[5]);
 				setdZip(fields[6]);
 			} else if (fields.length == LoaderConstants.TRANSACTION_SCHEMA.length) {
-				setType(DataType.TRANSATION);
+				setType(DataType.TRANSACTION);
 				setMemberID(fields[0]);
 				setAmount(fields[1]);
 				setCategory(fields[2]);
