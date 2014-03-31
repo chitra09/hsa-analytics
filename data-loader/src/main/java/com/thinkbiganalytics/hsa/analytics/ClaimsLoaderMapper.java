@@ -56,6 +56,9 @@ public class ClaimsLoaderMapper extends
 					put.add(Bytes.toBytes(LoaderConstants.CLAIMS_FAMILY),
 							Bytes.toBytes("amt"),
 							Bytes.toBytes(claims.getFinalAmt()));
+					put.add(Bytes.toBytes(LoaderConstants.CLAIMS_FAMILY),
+							Bytes.toBytes("cpt"),
+							Bytes.toBytes(claims.getCptCode()));
 					
 					hKey.set(Bytes.toBytes(rowkey));
 					context.write(hKey, put);
