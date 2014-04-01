@@ -25,7 +25,7 @@ claims = foreach claims generate keyMap#'memberId' as memberId, keyMap#'claimId'
 ***********************************************************
 */
 
-members_age = foreach members generate memberId,  (GetYear(CurrentTime()) - birthYear) as ageMember, gender, dependentId, relationship, (GetYear(CurrentTime()) - birthYear) as ageDependent, dependentGender;
+members_age = foreach members generate memberId,  (GetYear(CurrentTime()) - birthYear) as ageMember, gender, dependentId, relationship, (GetYear(CurrentTime()) - dependentBirthYear) as ageDependent, dependentGender;
 
 claims_dates =  foreach claims generate claimId, memberId, dependentService, claimType, (chararray) REGEX_EXTRACT(serviceStartDate, '(.*)-(.*)', 1) as serviceStartDate, repricedAmount, patientAmount;
 
