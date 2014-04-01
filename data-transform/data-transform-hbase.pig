@@ -1,6 +1,9 @@
 
 REGISTER './utils.py' using jython as utils
 REGISTER '$hbase';
+--REGISTER '/Users/Miguel/Documents/Servers/hbase-0.94.17/hbase-0.94.17.jar';
+--REGISTER '/Users/Miguel/Documents/Servers/hbase-0.94.17/lib/protobuf-java-2.4.0a.jar';
+
 
 /*
 ***********************************************************
@@ -17,7 +20,7 @@ transactions = foreach transactions generate keyMap#'memberId' as memberId, keyM
 
 claims = load '$claims' using org.apache.pig.backend.hadoop.hbase.HBaseStorage('D:cpt, D:dependent, D:type, D:dtRcvd, D:start, D:end, D:repricedAmount, D:amt', '-loadKey true') as (key:chararray, cpt:chararray, dependentService:chararray, claimType:chararray, dateReceived:chararray, serviceStartDate:chararray, serviceEndDate:chararray, repricedAmount:double, patientAmount:double);
 claims = foreach claims generate utils.parseClaims(key) as keyMap, cpt, dependentService, claimType, dateReceived, serviceStartDate, serviceEndDate, repricedAmount, patientAmount;
-claims = foreach claims generate keyMap#'memberId' as memberId, keyMap#'claimId' as claimId, keyMap#'dateProcessed' as dateProcessed, cpt, dependentService, claimType, dateReceived, serviceStartDate, serviceEndDate, repricedAmount, patientAmount;
+claims = foreach claims generate keyMap#'memberId' as memberId, keyMap#'claimId' as claimId, keyMap#'dateProcessed' as dateProcessed, cpt, CONCAT('0',dependentService) as dependentService, claimType, dateReceived, serviceStartDate, serviceEndDate, repricedAmount, patientAmount;
 
 /*
 ***********************************************************
@@ -27,7 +30,7 @@ claims = foreach claims generate keyMap#'memberId' as memberId, keyMap#'claimId'
 
 members_age = foreach members generate memberId,  (GetYear(CurrentTime()) - birthYear) as ageMember, gender, dependentId, relationship, (GetYear(CurrentTime()) - dependentBirthYear) as ageDependent, dependentGender;
 
-claims_dates =  foreach claims generate claimId, memberId, dependentService, claimType, (chararray) REGEX_EXTRACT(serviceStartDate, '(.*)-(.*)', 1) as serviceStartDate, repricedAmount, patientAmount;
+claims_dates =  foreach claims generate claimId, memberId, dependentService, claimType, (chararray) REGEX_EXTRACT(serviceStartDate, '(.*)-(.*)', 1) as serviceStartDate, repricedAmount, patientAmount,cpt;
 
 /*
 ***********************************************************
@@ -77,6 +80,26 @@ monthly_member_balance_spends = foreach monthly_member_balance_monthly_member_pa
 
 --Output format: MemberID, Month_Of_Service, Account_Balance, Amount_Spent
 store monthly_member_balance_spends into '$monthly_member_balance_spends' using PigStorage(',');
+
+
+--Transformation 4: Top claim types based on member/dependent age
+--Output age:int, cpt_code:chararray , count:int
+
+members_age_claims_dates = join members_age by (memberId,dependentId), claims_dates by (memberId,dependentService);
+
+members_age_cpt_claims 	=  	group members_age_claims_dates by (ageDependent, cpt);
+claims_types_by_age 	= 	foreach members_age_cpt_claims generate flatten(group), COUNT(members_age_claims_dates) as cptCases;
+
+
+claims_types_by_age_grouped = group claims_types_by_age by (ageDependent);
+
+top_claims_types_by_age  = foreach claims_types_by_age_grouped {
+	result = TOP(10, 2, claims_types_by_age);
+	GENERATE FLATTEN(result);
+}
+
+--output format:age, ctpCpde, number_patients
+store top_claims_types_by_age into '$top_claims_types_by_age' using PigStorage(',');
 
 
 
