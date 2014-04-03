@@ -10,7 +10,9 @@ public class LoaderConstants {
 			DEPENDENT_FAMILY };
 
 	public static final String[] MEMBER_SCHEMA = { "NewMemberID", "State",
-			"Zip", "Gender", "BirthYear", "HsaEffectiveDate" };
+			"Zip", "Gender", "BirthYear", "HsaEffectiveDate",
+			"DependentID", "Relationship", "BirthYear", "Gender", "State",
+			"Zip"};
 	public static final String[] DEPENDENT_SCHEMA = { "NewMemberID",
 			"DependentID", "Relationship", "BirthYear", "Gender", "State",
 			"Zip" };

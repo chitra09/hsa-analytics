@@ -1,9 +1,7 @@
-
 REGISTER './utils.py' using jython as utils
 REGISTER '$hbase';
 --REGISTER '/Users/Miguel/Documents/Servers/hbase-0.94.17/hbase-0.94.17.jar';
 --REGISTER '/Users/Miguel/Documents/Servers/hbase-0.94.17/lib/protobuf-java-2.4.0a.jar';
-
 
 /*
 ***********************************************************
@@ -11,7 +9,12 @@ REGISTER '$hbase';
 ***********************************************************
 */
 
-members = load '$member' using org.apache.pig.backend.hadoop.hbase.HBaseStorage('M:state, M:zip, M:g, M:birthYr, M:effectiveDt, D:dID, D:dRel, D:dBirthYr, D:g, D:dState, D:dZip', '-loadKey true') as (memberId:chararray, state:chararray, zip:int, gender:chararray, birthYear:int, hsaEffectiveDate:chararray,  dependentId:chararray, relationship:chararray, dependentBirthYear:int, dependentGender:chararray, dependentState:chararray, dependentZip:chararray);
+members = load '$member' using org.apache.pig.backend.hadoop.hbase.HBaseStorage('M:state, M:zip, M:g, M:birthYr, M:effectiveDt, D:dID, D:dRel, D:dBirthYr, D:g, D:dState, D:dZip', '-loadKey true') as (key:chararray, state:chararray, zip:int, gender:chararray, birthYear:int, hsaEffectiveDate:chararray,  dependentId:chararray, relationship:chararray, dependentBirthYear:int, dependentGender:chararray, dependentState:chararray, dependentZip:chararray);
+
+
+members = foreach members generate utils.parseMembers(key) as keyMap, state, zip, gender, birthYear, hsaEffectiveDate, dependentId, relationship, dependentBirthYear, dependentGender, dependentState, dependentZip;
+members = foreach members generate  keyMap#'memberId' as memberId, state, zip, gender, birthYear, hsaEffectiveDate, dependentId, relationship, dependentBirthYear, dependentGender, dependentState, dependentZip;
+
 
 transactions = load '$transactions' using org.apache.pig.backend.hadoop.hbase.HBaseStorage('D:amt', '-loadKey true') as (key:chararray, amount:double);
 transactions = foreach transactions generate utils.parseTransactions(key) as keyMap, amount;
@@ -28,7 +31,8 @@ claims = foreach claims generate keyMap#'memberId' as memberId, keyMap#'claimId'
 ***********************************************************
 */
 
-members_age = foreach members generate memberId,  (GetYear(CurrentTime()) - birthYear) as ageMember, gender, dependentId, relationship, (GetYear(CurrentTime()) - dependentBirthYear) as ageDependent, dependentGender;
+
+members_age = foreach members generate memberId,  (GetYear(CurrentTime()) - birthYear) as ageMember, gender, dependentId, relationship, (GetYear(CurrentTime()) - dependentBirthYear) as ageDependent, dependentGender, state;
 
 claims_dates =  foreach claims generate claimId, memberId, dependentService, claimType, (chararray) REGEX_EXTRACT(serviceStartDate, '(.*)-(.*)', 1) as serviceStartDate, repricedAmount, patientAmount,cpt;
 
@@ -82,8 +86,9 @@ monthly_member_balance_spends = foreach monthly_member_balance_monthly_member_pa
 store monthly_member_balance_spends into '$monthly_member_balance_spends' using PigStorage(',');
 
 
+
+
 --Transformation 4: Top claim types based on member/dependent age
---Output age:int, cpt_code:chararray , count:int
 
 members_age_claims_dates = join members_age by (memberId,dependentId), claims_dates by (memberId,dependentService);
 
@@ -102,6 +107,47 @@ top_claims_types_by_age  = foreach claims_types_by_age_grouped {
 store top_claims_types_by_age into '$top_claims_types_by_age' using PigStorage(',');
 
 
+
+--Transformation 5: Yearly report on members who are maxing out on their contributions
+
+
+transactions_year_dates = foreach transactions generate memberId, (int)REGEX_EXTRACT(paymentDate, '(.*)-(.*)-(.*)', 1) as year, amount;
+
+transactions_year_dates = filter transactions_year_dates by year >0 ;
+
+transactions_year_dates = group transactions_year_dates by (memberId,year);
+
+transactions_year_dates = foreach transactions_year_dates generate flatten(group) , (double)SUM(transactions_year_dates.amount) as amount, CONCAT('F','') as isMaxed;
+
+
+
+transactions_year_dates = order transactions_year_dates by memberId, year asc;
+
+transactions_year_dates = group transactions_year_dates by memberId;
+
+
+transactions_year_dates = foreach transactions_year_dates {
+	
+	orderBag =  order transactions_year_dates by group::year;
+ 	result = utils.reviewMaxMin(group,orderBag);
+ 	generate  flatten(group) , flatten(result);
+}
+
+
+transactions_year_dates = foreach transactions_year_dates generate output::group::memberId as memberId, output::group::year as year, output::amount as amount, output::isMaxed as isMaxed;
+
+transactions_year_dates = join members_age by memberId ,transactions_year_dates by memberId;
+
+transactions_year_dates = foreach transactions_year_dates generate transactions_year_dates::memberId as memberId, members_age::ageMember as age, members_age::state as state, transactions_year_dates::amount as contribution, transactions_year_dates::year as year, transactions_year_dates::isMaxed as isMaxed;
+
+transactions_year_dates = distinct transactions_year_dates;
+
+transactions_year_dates = order transactions_year_dates by memberId, year asc; 
+
+describe transactions_year_dates;
+
+--output format:memberId, year, amount, maxed
+store transactions_year_dates into '$yearly_report_maxing_contributions' using PigStorage(',');
 
 
 

@@ -36,6 +36,44 @@ public class Member {
 	private String category;
 	private String paymentAvailableDate;
 
+	
+	public Member(String row) {
+		String fields[] = row.split(",", -1);
+		// Check for header information in the data set
+		if (fields[0].equalsIgnoreCase(LoaderConstants.MEMBER_SCHEMA[0])
+				|| fields[0]
+						.equalsIgnoreCase(LoaderConstants.DEPENDENT_SCHEMA[0])
+				|| fields[0]
+						.equalsIgnoreCase(LoaderConstants.TRANSACTION_SCHEMA[0])) {
+			isValid = false;
+		} else {
+			isValid = true;
+		
+			if (fields.length == (LoaderConstants.MEMBER_SCHEMA.length) ) {
+				setType(DataType.MEMBER);
+				setMemberID(fields[0]);
+				setState(fields[1]);
+				setZip(fields[2]);
+				setGender(fields[3]);
+				setBirthYear(fields[4]);
+				setHsaEffectiveDate(fields[5]);
+				setdID(fields[6]);
+				setRelationship(fields[7]);
+				setdBirthYear(fields[8]);
+				setdGender(fields[9]);
+				setdState(fields[10]);
+				setdZip(fields[11]);
+			} else if (fields.length == LoaderConstants.TRANSACTION_SCHEMA.length) {
+				setType(DataType.TRANSACTION);
+				setMemberID(fields[0]);
+				setAmount(fields[1]);
+				setCategory(fields[2]);
+				setPaymentAvailableDate(fields[3]);
+			}
+		}
+	}
+	
+	/*
 	public Member(String row) {
 		String fields[] = row.split(",", -1);
 		// Check for header information in the data set
@@ -73,7 +111,9 @@ public class Member {
 			}
 		}
 	}
-
+	 */
+	
+	
 	public String getBirthYear() {
 		return birthYear;
 	}
@@ -207,7 +247,7 @@ public class Member {
 	public void setPaymentAvailableDate(String paymentAvailableDate) {
 		this.paymentAvailableDate = paymentAvailableDate;
 	}
-	
+
 	public DataType getType() {
 		return type;
 	}
