@@ -91,3 +91,19 @@ def reviewMaxMin(memberId,bag):
 
     return output;
 
+
+@outputSchema("output:chararray")
+def setQuarterValues(sample):
+    output          = []
+    dateArray       = sample.split('-')
+    month           = (int)(dateArray[1])
+    if( month >= 1 and month <= 4):
+        return '1'
+    if( month >= 5  and month<= 8):
+       return '2'
+    if( month >= 9  and month<= 12):
+        return '3'
+    return '0';
+
+
+
