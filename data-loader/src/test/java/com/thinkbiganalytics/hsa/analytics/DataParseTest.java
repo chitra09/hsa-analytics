@@ -20,7 +20,7 @@ import org.junit.Test;
  * 
  */
 public class DataParseTest {
-
+	/*
 	@Test
 	public void parseDependentData() {
 		String data = "738,00,Self,1972,M,,";
@@ -34,10 +34,11 @@ public class DataParseTest {
 		assertEquals("", member.getdState());
 		assertEquals("", member.getdZip());
 	}
+	*/
 
 	@Test
 	public void parseMemberData() {
-		String data = "6,AR,71854,F,1960,2012-01-01 00:00:00.000";
+		String data = "6,AR,71854,F,1960,2012-01-01 00:00:00.000,00,Self,1972,M,,";
 		Member member = new Member(data);
 		assertEquals(DataType.MEMBER, member.getType());
 		assertEquals("6", member.getMemberID());
