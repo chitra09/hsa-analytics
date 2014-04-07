@@ -1,6 +1,7 @@
 
 --define VAR datafu.pig.stats.VAR();
 REGISTER './utils.py' using jython as utils
+REGISTER './piggybank.jar'
 
 
 /*
@@ -107,7 +108,15 @@ describe 	trasactions_dates_in_number;
 --describe 	trasactions_dates_in_number;
 
 
-STORE trasactions_dates_in_number INTO 'output' USING org.apache.pig.piggybank.storage.MultiStorage('trasactions_dates_in_number', '0', 'none', ',');
+--30216
+--30097
+
+
+--trasactions_dates_in_number = filter trasactions_dates_in_number by memberId ==30097;
+
+--store trasactions_dates_in_number into '/HSAWeka' using PigStorage(',');
+
+STORE trasactions_dates_in_number INTO '/HSAWeka' USING org.apache.pig.piggybank.storage.MultiStorage('/HSAWeka', '0', 'none', ',');
 
 
 --dump trasactions_dates_in_number;
